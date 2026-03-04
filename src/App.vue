@@ -15,6 +15,11 @@
               v-model:status="filters.status.value"
               v-model:category="filters.category.value"
               v-model:detectedPhase="filters.detectedPhase.value"
+              v-model:priority="filters.priority.value"
+              v-model:vehicle="filters.vehicle.value"
+              v-model:product="filters.product.value"
+              v-model:dateFrom="filters.dateFrom.value"
+              v-model:dateTo="filters.dateTo.value"
               :has-active-filters="filters.hasActiveFilters.value"
               @reset="filters.resetFilters()"
             />
@@ -36,11 +41,19 @@
 
           <div class="view-footer">
             <span class="total-label">{{ t('filter.total') }}: {{ defectStore.total.value }} {{ t('filter.defects') }}</span>
-            <Pagination
-              :current-page="defectStore.currentPage.value"
-              :total-pages="defectStore.totalPages.value"
-              @change="onPageChange"
-            />
+            <div class="footer-right">
+              <Pagination
+                :current-page="defectStore.currentPage.value"
+                :total-pages="defectStore.totalPages.value"
+                @change="onPageChange"
+              />
+              <select class="page-size-select" v-model.number="defaultPageSize">
+                <option :value="10">10</option>
+                <option :value="20">20</option>
+                <option :value="50">50</option>
+                <option :value="100">100</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -48,6 +61,9 @@
         <div v-else-if="currentView === 'dashboard'" class="view-dashboard">
           <StatsPanel :stats="defectStore.stats.value" />
         </div>
+
+        <!-- Settings View -->
+        <SettingsView v-else-if="currentView === 'settings'" />
       </main>
     </div>
 
@@ -88,7 +104,7 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from '@/i18n'
 import { useDefects } from '@/composables/useDefects'
-import { useFilters } from '@/composables/useFilters'
+import { useFilters, defaultPageSize } from '@/composables/useFilters'
 import { useToast } from '@/composables/useToast'
 import type { Defect } from '@/types/api'
 import type { ViewType } from '@/types/form'
@@ -102,6 +118,7 @@ import DefectDetail from '@/components/defects/DefectDetail.vue'
 import ConfirmDialog from '@/components/shared/ConfirmDialog.vue'
 import Pagination from '@/components/shared/Pagination.vue'
 import StatsPanel from '@/components/dashboard/StatsPanel.vue'
+import SettingsView from '@/components/settings/SettingsView.vue'
 import HotkeyModal from '@/components/shared/HotkeyModal.vue'
 import ToastContainer from '@/components/shared/ToastContainer.vue'
 
@@ -241,6 +258,21 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeyboard))
 .total-label {
   font-size: 13px;
   color: var(--text-muted);
+}
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.page-size-select {
+  height: 32px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
 }
 
 /* Shared button styles */

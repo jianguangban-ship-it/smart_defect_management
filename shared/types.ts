@@ -98,3 +98,70 @@ export interface DefectStats {
   byPriority: Record<string, number>
   recentTrend: { date: string; count: number }[]
 }
+
+// ─── Webhook Types ──────────────────────────────────────
+export type WebhookPlatform = 'dingtalk' | 'wecom' | 'feishu' | 'custom'
+export type PayloadFormat = 'full' | 'summary'
+export type SchedulePreset = 'disabled' | 'every_hour' | 'every_6h' | 'daily_9' | 'weekly_mon_9'
+export type DateRangePreset = 'last_24h' | 'last_7d' | 'last_30d' | 'all'
+
+export const SCHEDULE_PRESETS: Record<SchedulePreset, string> = {
+  disabled: '',
+  every_hour: '0 * * * *',
+  every_6h: '0 */6 * * *',
+  daily_9: '0 9 * * *',
+  weekly_mon_9: '0 9 * * 1',
+}
+
+export interface WebhookConfig {
+  id: number
+  url: string
+  platform: WebhookPlatform
+  payloadFormat: PayloadFormat
+  schedule: SchedulePreset
+  filterSeverity: string
+  filterStatus: string
+  filterPriority: string
+  filterVehicle: string
+  filterProduct: string
+  dateRange: DateRangePreset
+  customKeywords: string
+  nextRunAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface WebhookConfigInput {
+  url: string
+  platform: WebhookPlatform
+  payloadFormat: PayloadFormat
+  schedule: SchedulePreset
+  filterSeverity?: string
+  filterStatus?: string
+  filterPriority?: string
+  filterVehicle?: string
+  filterProduct?: string
+  dateRange?: DateRangePreset
+  customKeywords?: string
+}
+
+export interface WebhookPreviewInput {
+  platform?: WebhookPlatform
+  payloadFormat?: PayloadFormat
+  filterSeverity?: string
+  filterStatus?: string
+  filterPriority?: string
+  filterVehicle?: string
+  filterProduct?: string
+  dateRange?: DateRangePreset
+  customKeywords?: string
+}
+
+export interface WebhookHistoryEntry {
+  id: number
+  triggeredAt: string
+  status: 'success' | 'error'
+  httpStatus: number | null
+  responseSnippet: string
+  defectCount: number
+}

@@ -34,6 +34,7 @@ defineEmits<{ 'update:modelValue': [view: ViewType] }>()
 const navItems = computed(() => [
   { view: 'defects' as ViewType, label: t('nav.defects'), icon: '&#9888;' },
   { view: 'dashboard' as ViewType, label: t('nav.dashboard'), icon: '&#9632;' },
+  { view: 'settings' as ViewType, label: t('nav.settings'), icon: '&#9881;' },
 ])
 </script>
 

@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url'
 import { initDb } from './db/connection.js'
 import { healthRoutes } from './routes/health.js'
 import { defectRoutes } from './routes/defects.js'
+import { webhookRoutes } from './routes/webhook.js'
+import { initScheduler } from './webhook/scheduler.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -16,6 +18,7 @@ await server.register(cors, { origin: true })
 // API routes
 await server.register(healthRoutes, { prefix: '/api' })
 await server.register(defectRoutes, { prefix: '/api' })
+await server.register(webhookRoutes, { prefix: '/api' })
 
 // Serve static SPA in production
 if (process.env.NODE_ENV === 'production') {
@@ -33,7 +36,8 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Initialize database and start server
-initDb()
+await initDb()
+await initScheduler()
 
 const port = parseInt(process.env.PORT || '3001', 10)
 const host = process.env.HOST || '0.0.0.0'

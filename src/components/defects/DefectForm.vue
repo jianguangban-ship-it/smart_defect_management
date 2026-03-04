@@ -88,25 +88,34 @@
           <div class="form-row-2">
             <div class="form-group">
               <label class="form-label">{{ t('defect.reporter') }} <span class="required">*</span></label>
-              <select class="input-base" v-model="reporterKey" required>
-                <option value="">{{ t('form.select') }}</option>
-                <option v-for="m in allMembers" :key="m.id" :value="m.id + '|' + m.name">{{ m.name }}</option>
-              </select>
+              <AssigneeCombobox
+                :modelValue="reporterId"
+                @update:modelValue="reporterId = $event"
+                :items="allMembers"
+                :selectedName="reporterName"
+                :placeholder="t('form.searchAssignee')"
+                :groupLabel="t('defect.reporter')"
+                :resultsLabel="t('form.results')"
+                :noResultsLabel="t('form.noResults')"
+              />
             </div>
             <div class="form-group">
               <label class="form-label">{{ t('defect.assignee') }}</label>
-              <select class="input-base" v-model="assigneeKey">
-                <option value="">{{ t('form.select') }}</option>
-                <option v-for="m in allMembers" :key="m.id" :value="m.id + '|' + m.name">{{ m.name }}</option>
-              </select>
+              <AssigneeCombobox
+                :modelValue="assigneeId"
+                @update:modelValue="assigneeId = $event"
+                :items="allMembers"
+                :selectedName="assigneeName"
+                :placeholder="t('form.searchAssignee')"
+                :groupLabel="t('defect.assignee')"
+                :resultsLabel="t('form.results')"
+                :noResultsLabel="t('form.noResults')"
+              />
             </div>
           </div>
 
           <!-- Description -->
-          <div class="form-group">
-            <label class="form-label">{{ t('defect.description') }}</label>
-            <textarea class="input-base textarea" v-model="form.description" :placeholder="t('form.descriptionPlaceholder')" rows="4"></textarea>
-          </div>
+          <DescriptionEditor v-model="form.description" />
 
           <!-- Root Cause + Corrective Action -->
           <div class="form-row-2">
@@ -141,6 +150,8 @@ import { useToast } from '@/composables/useToast'
 import { SEVERITIES, PRIORITIES, STATUSES, CATEGORIES, DETECTED_PHASES, VEHICLE_OPTIONS, PRODUCT_OPTIONS, LAYER_OPTIONS, DEFAULT_COMPONENT_OPTIONS } from '@/config/constants'
 import { TEAM_MEMBERS } from '@/config/projects'
 import type { Defect } from '@/types/api'
+import AssigneeCombobox from '@/components/form/AssigneeCombobox.vue'
+import DescriptionEditor from '@/components/form/DescriptionEditor.vue'
 
 const props = defineProps<{ defect: Defect | null }>()
 const emit = defineEmits<{ save: []; close: [] }>()
@@ -152,7 +163,7 @@ const { createDefect, updateDefect } = useDefects()
 const isSubmitting = ref(false)
 
 const allMembers = computed(() => {
-  const all: { id: string; name: string }[] = []
+  const all: typeof TEAM_MEMBERS[keyof typeof TEAM_MEMBERS] = []
   for (const members of Object.values(TEAM_MEMBERS)) {
     for (const m of members) {
       if (!all.some(a => a.id === m.id)) all.push(m)
@@ -177,27 +188,23 @@ const form = reactive({
   correctiveAction: props.defect?.correctiveAction || '',
 })
 
-const reporterKey = ref(
-  props.defect ? `${props.defect.reporterId}|${props.defect.reporterName}` : ''
-)
-const assigneeKey = ref(
-  props.defect?.assigneeId ? `${props.defect.assigneeId}|${props.defect.assigneeName}` : ''
-)
+const reporterId = ref(props.defect?.reporterId || '')
+const assigneeId = ref(props.defect?.assigneeId || '')
+
+const reporterName = computed(() => allMembers.value.find(m => m.id === reporterId.value)?.name || '')
+const assigneeName = computed(() => allMembers.value.find(m => m.id === assigneeId.value)?.name || '')
 
 async function handleSubmit() {
-  const [reporterId, reporterName] = reporterKey.value.split('|')
-  if (!form.title || !reporterId) return
-
-  const [assigneeId, assigneeName] = assigneeKey.value ? assigneeKey.value.split('|') : ['', '']
+  if (!form.title || !reporterId.value) return
 
   isSubmitting.value = true
   try {
     const payload = {
       ...form,
-      reporterId,
-      reporterName: reporterName || '',
-      assigneeId: assigneeId || '',
-      assigneeName: assigneeName || '',
+      reporterId: reporterId.value,
+      reporterName: reporterName.value,
+      assigneeId: assigneeId.value,
+      assigneeName: assigneeName.value,
     }
 
     if (props.defect) {

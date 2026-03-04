@@ -1,0 +1,25 @@
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+
+export const defects = sqliteTable('defects', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  description: text('description').default(''),
+  severity: text('severity').default('Minor'),
+  priority: text('priority').default('P2'),
+  status: text('status').default('Open'),
+  category: text('category').default('Other'),
+  detectedPhase: text('detected_phase').default('Design'),
+  vehicle: text('vehicle').default(''),
+  product: text('product').default(''),
+  layer: text('layer').default(''),
+  component: text('component').default(''),
+  reporterId: text('reporter_id').notNull(),
+  reporterName: text('reporter_name').notNull(),
+  assigneeId: text('assignee_id').default(''),
+  assigneeName: text('assignee_name').default(''),
+  rootCause: text('root_cause').default(''),
+  correctiveAction: text('corrective_action').default(''),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+})
